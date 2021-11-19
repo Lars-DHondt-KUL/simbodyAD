@@ -284,6 +284,9 @@ public:
         (*stream) << std::scientific << std::setprecision(16);
         (*stream) << "function [y,a,b]=foo(x)" << std::endl;
         (*stream) << "nom = nargin==0;" << std::endl;
+		(*stream) << "a = {};" << std::endl;
+		(*stream) << "b = {};" << std::endl;
+		(*stream) << "y = {};" << std::endl;
     }
 
     std::ofstream* stream;

@@ -171,7 +171,7 @@ Rotation_& setRotationFromAngleAboutAxis(RealP angle, const CoordinateAxis& axis
 /** Constructor for right-handed rotation by an angle (in radians) about the 
 X-axis. **/
 Rotation_( RealP angle, const CoordinateAxis::XCoordinateAxis )  
-{ setRotationFromAngleAboutX(NTraits<RealP>::cos(angle), NTraits<RealP>::NTraits<RealP>::cos(angle) ); }
+{ setRotationFromAngleAboutX(NTraits<RealP>::cos(angle), NTraits<RealP>::sin(angle) ); }
 
 /** Set this Rotation_ object to a right-handed rotation by an angle (in 
 radians) about the X-axis. **/

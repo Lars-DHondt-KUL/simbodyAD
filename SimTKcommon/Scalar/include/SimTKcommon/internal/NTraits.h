@@ -1440,7 +1440,26 @@ public:
     static TAbs         abs(const T& t) {return fabs(t);}               
     static const TStandard& standardize(const T& t) {return t;}             
     static TNormalize normalize(const T& t) {return (t>0?T(1):(t<0?T(-1):getNaN()));} 
-    static TInvert invert(const T& t) {return T(1)/t;}       
+    static TInvert invert(const T& t) {return T(1)/t;}   
+    #ifdef SimTK_REAL_IS_ADOUBLE // use methods in recorde class rather than :: namespace
+    static Tsin     sin(const T& t) { return sin(t); } 
+    static Tcos     cos(const T& t) { return cos(t); }
+    static Tfloor    floor(const T& t) { return floor(t); }
+    static Tpow    pow(const T& t, const T& order) { return pow(t, order); }
+    static Texp   exp(const T& t) { return exp(t); }
+    static Tlog   log(const T& t) { return log(t); }
+    static Ttan   tan(const T& t) { return tan(t); }
+    static Tasin   asin(const T& t) { return asin(t); }
+    static Tacos   acos(const T& t) { return acos(t); }
+    static Tatan   atan(const T& t) { return atan(t); }
+    static Tatan2  atan2(const T& t1, const T& t2) { return atan2(t1, t2); }
+    static Tsinh   sinh(const T& t) { return sinh(t); }
+    static Tcosh   cosh(const T& t) { return cosh(t); }
+    static Ttanh   tanh(const T& t) { return tanh(t); }
+    static Tmax   max(const T& t, const T& t2) { return fmax(t,t2); }
+    static Tmin   min(const T& t, const T& t2) { return fmin(t, t2); }
+    static Tlog10   log10(const T& t) { return log10(t); }
+    #else
     static Tsin     sin(const T& t) { return ::sin(t); } 
     static Tcos     cos(const T& t) { return ::cos(t); }
     static Tfloor    floor(const T& t) { return ::floor(t); }
@@ -1458,6 +1477,7 @@ public:
     static Tmax   max(const T& t, const T& t2) { return ::fmax(t,t2); }
     static Tmin   min(const T& t, const T& t2) { return ::fmin(t, t2); }
     static Tlog10   log10(const T& t) { return ::log10(t); }
+    #endif
     /* properties of this floating point representation, with memory addresses */     
     static const T& getEps()          {static const T c=RTraits<T>::getEps(); return c;}
     static const T& getSignificant()  {static const T c=RTraits<T>::getSignificant(); return c;}

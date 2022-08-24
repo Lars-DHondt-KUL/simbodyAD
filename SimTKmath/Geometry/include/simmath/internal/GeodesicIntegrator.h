@@ -86,7 +86,7 @@ GeodesicIntegrator<MyEquations> integ(eqns, accuracy, constraintTol);
 integ.initialize(t0, y0);
 // Integrate to time finalTime, getting output every completed step.
 while (true) {
-    cout << "t=" << integ.getTime() << " y=" << integ.getY() << "\n";
+    std::cout << "t=" << integ.getTime() << " y=" << integ.getY() << "\n";
     if (integ.getTime() == finalTime)
         break;
     integ.takeOneStep(finalTime);

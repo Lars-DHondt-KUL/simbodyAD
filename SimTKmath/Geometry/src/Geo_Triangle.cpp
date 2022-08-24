@@ -625,7 +625,6 @@ tri_tri_overlap_test_2d(const RealP p1[2], const RealP q1[2], const RealP r1[2],
 
 // Explicit instantiations for float and double.
 template class Geo::Triangle_<float>;
-//template class Geo::Triangle_<double>;
 template class Geo::Triangle_<Real>;
 
 

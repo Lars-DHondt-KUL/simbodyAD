@@ -86,7 +86,7 @@ GeodesicIntegrator<MyEquations> integ(eqns, accuracy, constraintTol);
 integ.initialize(t0, y0);
 // Integrate to time finalTime, getting output every completed step.
 while (true) {
-    std::cout << "t=" << integ.getTime() << " y=" << integ.getY() << "\n";
+    cout << "t=" << integ.getTime() << " y=" << integ.getY() << "\n";
     if (integ.getTime() == finalTime)
         break;
     integ.takeOneStep(finalTime);
@@ -256,7 +256,7 @@ public:
         Real norm = 0;
         for (int i=0; i< Z; ++i) 
             norm += square(v[i]);
-        return std::sqrt(norm/Z);
+        return NTraits<Real>::sqrt(norm/Z);
     }
 
 private:

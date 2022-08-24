@@ -43,7 +43,6 @@ namespace SimTK {
 
 // Explicit instantiations for float and double.
 template class Geo::Sphere_<float>;
-template class Geo::Sphere_<double>;
 template class Geo::Sphere_<Real>;
 
 }  // End of namespace SimTK

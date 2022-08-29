@@ -128,10 +128,10 @@ set(BUILD_DYNAMIC_LIBRARIES TRUE CACHE BOOL
 set(BUILD_STATIC_LIBRARIES FALSE CACHE BOOL
 "Build '_static' versions of libraries")
 
-if(NOT BUILD_DYNAMIC_LIBRARIES AND NOT BUILD_STATIC_LIBRARIES)
-    message(SEND_ERROR "BUILD_DYNAMIC_LIBRARIES and BUILD_STATIC_LIBRARIES "
-        "are both set to FALSE. No compilation is possible!")
-endif()
+# if(NOT BUILD_DYNAMIC_LIBRARIES AND NOT BUILD_STATIC_LIBRARIES)
+    # message(SEND_ERROR "BUILD_DYNAMIC_LIBRARIES and BUILD_STATIC_LIBRARIES "
+        # "are both set to FALSE. No compilation is possible!")
+# endif()
 
 # Recorder libraries and tests won't be built unless this is set.
 # Recorder libraries are always built shared rather than static.

@@ -16,3 +16,4 @@ obj-*
 .*.swo
 # gedit
 *~
+*.DS_Store

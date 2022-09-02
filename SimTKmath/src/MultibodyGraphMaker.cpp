@@ -345,10 +345,17 @@ void MultibodyGraphMaker::dumpGraph(std::ostream& o) const {
     o << "\n" << getNumBodies() << " BODIES:\n";
     for (int i=0; i < getNumBodies(); ++i) {
         const MultibodyGraphMaker::Body& body  = getBody(i);
+#ifndef SimTK_REAL_IS_ADOUBLE
         sprintf(buf, "%2d %2d: %s mass=%g mob=%d master=%d %s\n", 
             i, body.level,
             body.name.c_str(), body.mass, body.mobilizer, body.master,
             body.mustBeBaseBody?"MUST BE BASE BODY":"");
+#else
+        sprintf(buf, "%2d %2d: %s mass=%g mob=%d master=%d %s\n",
+            i, body.level,
+            body.name.c_str(), body.mass.getValue(), body.mobilizer, body.master,
+            body.mustBeBaseBody?"MUST BE BASE BODY":"");
+#endif
         o << buf;
         o << "  jointsAsParent=[";
         for (unsigned j=0; j<body.jointsAsParent.size(); ++j)

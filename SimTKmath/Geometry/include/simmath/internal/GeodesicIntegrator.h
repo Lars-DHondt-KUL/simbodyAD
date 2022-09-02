@@ -256,7 +256,7 @@ public:
         Real norm = 0;
         for (int i=0; i< Z; ++i) 
             norm += square(v[i]);
-        return std::sqrt(norm/Z);
+        return NTraits<Real>::sqrt(norm/Z);
     }
 
 private:

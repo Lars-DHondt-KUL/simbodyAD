@@ -785,6 +785,7 @@ getFdF(const Vec2& aXY, int wantLevel, PatchHint& hint) const {
     h.fxxx = mdxxx[0] + ypt* mdxxx[1] + ypt2*mdxxx[2] + ypt3*mdxxx[3];
     h.level = 3; // third derivatives are ready
 
+
     if(_debug == true){
         cout<<" getFdF" << endl;
         cout <<"Member variables" <<endl;
@@ -798,11 +799,19 @@ getFdF(const Vec2& aXY, int wantLevel, PatchHint& hint) const {
         cout <<" Intermediate variables " << endl;
         cout <<"XY: " << aXY << endl;
         printf("[x0 x1], [y0 y1]: [%d %d],[%d %d]\n",x0,x1,y0,y1);
+#ifndef SimTK_REAL_IS_ADOUBLE
         printf("[x0V x1V], [y0V y1V]: [%f %f],[%f %f]\n",_x(x0),_x(x1),_y(y0),_y(y1));
         cout <<" xS " << h.xS << " yS " << h.yS << endl;
         printf("(xp,yp): (%f %f)\n",xpt,ypt);
+#else
+        printf("[x0V x1V], [y0V y1V]: [%f %f],[%f %f]\n",_x(x0).getValue(),_x(x1).getValue(),_y(y0).getValue(),_y(y1).getValue());
+        cout <<" xS " << h.xS << " yS " << h.yS << endl;
+        printf("(xp,yp): (%f %f)\n",xpt.getValue(),ypt.getValue());
+#endif
+        
         cout << "\n\n\n"<<endl;
     }
+
 }
 
 

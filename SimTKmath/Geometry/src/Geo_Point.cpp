@@ -1400,7 +1400,6 @@ calcApproxBoundingSphereIndirect(const Array_<const Vec3P*>& points) {
 
 // Explicit instantiations for float and double.
 template class Geo::Point_<float>;
-template class Geo::Point_<double>;
 template class Geo::Point_<Real>;
 
 }  // End of namespace SimTK

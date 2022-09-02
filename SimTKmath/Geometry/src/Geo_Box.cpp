@@ -265,7 +265,6 @@ intersectsOrientedBox(const Geo::OrientedBox_<P>& ob) const {
     
 // Explicit instantiations for float and double.
 template class Geo::Box_<float>;
-template class Geo::Box_<double>;
 template class Geo::Box_<Real>;
 
 //==============================================================================
@@ -273,7 +272,6 @@ template class Geo::Box_<Real>;
 //==============================================================================
 // Explicit instantiations for float and double.
 template class Geo::AlignedBox_<float>;
-template class Geo::AlignedBox_<double>;
 template class Geo::AlignedBox_<Real>;
 
 //==============================================================================
@@ -284,7 +282,6 @@ template class Geo::AlignedBox_<Real>;
 
 // Explicit instantiations for float and double.
 template class Geo::OrientedBox_<float>;
-template class Geo::OrientedBox_<double>;
 template class Geo::OrientedBox_<Real>;
 
 }  // End of namespace SimTK

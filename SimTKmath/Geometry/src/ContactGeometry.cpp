@@ -1612,9 +1612,15 @@ calcGeodesicReverseSensitivity(Geodesic& geod, const Vec2& initJacobi) const {
             if (status == Integrator::StartOfContinuousInterval)
                 continue;
             if (integ.getTime() < arcLength) {
+#ifndef SimTK_REAL_IS_ADOUBLE
                 printf("integ to %g returned early at %g with status=%s\n",
                     arcLength, integ.getTime(),
                     Integrator::getSuccessfulStepStatusString(status).c_str());
+#else
+                printf("integ to %g returned early at %g with status=%s\n",
+                    arcLength.getValue(), integ.getTime().getValue(),
+                    Integrator::getSuccessfulStepStatusString(status).c_str());
+#endif
             }
         } while (integ.getTime() < arcLength);
 

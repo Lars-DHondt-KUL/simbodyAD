@@ -1339,9 +1339,63 @@ SimTK_DEFINE_REAL_NTRAITS(long double);
 #undef SimTK_DEFINE_REAL_NTRAITS
 
 #ifdef SimTK_REAL_IS_ADOUBLE
-    inline Recorder adolc_sqrt(const Recorder& x) {
     /* TODOautodiff temporary hack*/
+    inline Recorder recorder_sqrt(const Recorder& x) {    
         return sqrt(x);
+    }
+    inline Recorder recorder_fabs(const Recorder& x) {    
+        return fabs(x);
+    }
+    inline Recorder recorder_sin(const Recorder& x) {
+        return sin(x);
+    }
+    inline Recorder recorder_cos(const Recorder& x) {
+        return cos(x);
+    }
+    inline Recorder recorder_floor(const Recorder& x) {
+        return floor(x);
+    }
+    inline Recorder recorder_pow(const Recorder& x, const Recorder& x2) {
+        return pow(x, x2);
+    }
+    inline Recorder recorder_exp(const Recorder& x) {
+        return exp(x);
+    }
+    inline Recorder recorder_log(const Recorder& x) {
+        return log(x);
+    }
+    inline Recorder recorder_tan(const Recorder& x) {
+        return tan(x);
+    }
+    inline Recorder recorder_asin(const Recorder& x) {
+        return asin(x);
+    }
+    inline Recorder recorder_acos(const Recorder& x) {
+        return acos(x);
+    }
+    inline Recorder recorder_atan(const Recorder& x) {
+        return atan(x);
+    }
+    inline Recorder recorder_atan2(const Recorder& x, const Recorder& x2) {
+        return atan2(x, x2);
+    }
+    inline Recorder recorder_sinh(const Recorder& x) {
+        return sinh(x);
+    }
+    inline Recorder recorder_cosh(const Recorder& x) {
+        return cosh(x);
+    }
+    inline Recorder recorder_tanh(const Recorder& x) {
+        return tanh(x);
+    }
+    inline Recorder recorder_fmax(const Recorder& x, const Recorder& x2) {
+        return fmax(x, x2);
+    }
+    inline Recorder recorder_fmin(const Recorder& x, const Recorder& x2) {
+        return fmin(x, x2);
+    }
+    inline Recorder recorder_log10(const Recorder& x) {
+        return log10(x);
     }
 #endif
 
@@ -1436,28 +1490,28 @@ public:
     static       TWithoutNegator& updCastAwayNegatorIfAny(T& t)             
         {return reinterpret_cast<TWithoutNegator&>(t);}                     
     static ScalarNormSq scalarNormSqr(const T& t) {return t*t;}             
-    static TSqrt        sqrt(const T& t) {return adolc_sqrt(t);}
-    static TAbs         abs(const T& t) {return fabs(t);}               
+    static TSqrt        sqrt(const T& t) {return recorder_sqrt(t);}
+    static TAbs         abs(const T& t) {return recorder_fabs(t);}               
     static const TStandard& standardize(const T& t) {return t;}             
     static TNormalize normalize(const T& t) {return (t>0?T(1):(t<0?T(-1):getNaN()));} 
-    static TInvert invert(const T& t) {return T(1)/t;}       
-    static Tsin     sin(const T& t) { return ::sin(t); } 
-    static Tcos     cos(const T& t) { return ::cos(t); }
-    static Tfloor    floor(const T& t) { return ::floor(t); }
-    static Tpow    pow(const T& t, const T& order) { return ::pow(t, order); }
-    static Texp   exp(const T& t) { return ::exp(t); }
-    static Tlog   log(const T& t) { return ::log(t); }
-    static Ttan   tan(const T& t) { return ::tan(t); }
-    static Tasin   asin(const T& t) { return ::asin(t); }
-    static Tacos   acos(const T& t) { return ::acos(t); }
-    static Tatan   atan(const T& t) { return ::atan(t); }
-    static Tatan2  atan2(const T& t1, const T& t2) { return ::atan2(t1, t2); }
-    static Tsinh   sinh(const T& t) { return ::sinh(t); }
-    static Tcosh   cosh(const T& t) { return ::cosh(t); }
-    static Ttanh   tanh(const T& t) { return ::tanh(t); }
-    static Tmax   max(const T& t, const T& t2) { return ::fmax(t,t2); }
-    static Tmin   min(const T& t, const T& t2) { return ::fmin(t, t2); }
-    static Tlog10   log10(const T& t) { return ::log10(t); }
+    static TInvert invert(const T& t) {return T(1)/t;}
+    static Tsin     sin(const T& t) { return recorder_sin(t); } 
+    static Tcos     cos(const T& t) { return recorder_cos(t); }
+    static Tfloor    floor(const T& t) { return recorder_floor(t); }
+    static Tpow    pow(const T& t, const T& order) { return recorder_pow(t, order); }
+    static Texp   exp(const T& t) { return recorder_exp(t); }
+    static Tlog   log(const T& t) { return recorder_log(t); }
+    static Ttan   tan(const T& t) { return recorder_tan(t); }
+    static Tasin   asin(const T& t) { return recorder_asin(t); }
+    static Tacos   acos(const T& t) { return recorder_acos(t); }
+    static Tatan   atan(const T& t) { return recorder_atan(t); }
+    static Tatan2  atan2(const T& t1, const T& t2) { return recorder_atan2(t1, t2); }
+    static Tsinh   sinh(const T& t) { return recorder_sinh(t); }
+    static Tcosh   cosh(const T& t) { return recorder_cosh(t); }
+    static Ttanh   tanh(const T& t) { return recorder_tanh(t); }
+    static Tmax   max(const T& t, const T& t2) { return recorder_fmax(t,t2); }
+    static Tmin   min(const T& t, const T& t2) { return recorder_fmin(t, t2); }
+    static Tlog10   log10(const T& t) { return recorder_log10(t); }
     /* properties of this floating point representation, with memory addresses */     
     static const T& getEps()          {static const T c=RTraits<T>::getEps(); return c;}
     static const T& getSignificant()  {static const T c=RTraits<T>::getSignificant(); return c;}

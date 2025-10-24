@@ -20,15 +20,20 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <filesystem>
 #include <ctime>
 #include <stdexcept>
 #include <iomanip>
 #include <cmath>
-#include "SimTKcommon/internal/recorder.h"
+//#include "SimTKcommon/internal/Recorder.h"
+#include "recorder.h"
 
 static int counter_asserts = 0;
 
-Recorder::Recorder(const Recorder& r) {
+//-------------------------------------------------------------------------
+// python 
+//-------------------------------------------------------------------------
+PythonRecorder::PythonRecorder(const PythonRecorder& r) {
   value_ = r.value_;
   if (r.is_symbol()) {
     id_ = get_id();
@@ -38,14 +43,14 @@ Recorder::Recorder(const Recorder& r) {
   }
 }
 
-Recorder::~Recorder() {
-       if(id_ == 0) std::cout << "goodbye" << id_ << ":" << value_ << std::endl;
+PythonRecorder::~PythonRecorder() {
+  if(id_ == 0) std::cout << "goodbye" << id_ << ":" << value_ << std::endl;
 }
 
-Recorder::Recorder() : id_(-1), value_(3.14) {}
-Recorder::Recorder(double value) : id_(-1), value_(value) {}
+PythonRecorder::PythonRecorder() : id_(-1), value_(3.14) {}
+PythonRecorder::PythonRecorder(double value) : id_(-1), value_(value) {}
 
-void Recorder::operator<<=(double value) {
+void PythonRecorder::operator<<=(double value) {
   if (is_symbol()) throw std::runtime_error("Needs to be symbolic");
   id_ = get_id();
   stream() << "    if nom:" << std::endl;
@@ -56,7 +61,7 @@ void Recorder::operator<<=(double value) {
   value_ = value;
 }
 
-Recorder& Recorder::operator = ( const Recorder& r) {
+PythonRecorder& PythonRecorder::operator = ( const PythonRecorder& r) {
   value_ = r.value_;
   if (r.is_symbol()) {
     id_ = get_id();
@@ -67,7 +72,7 @@ Recorder& Recorder::operator = ( const Recorder& r) {
   return *this;
 }
 
-void Recorder::operator>>=(double& value) {
+void PythonRecorder::operator>>=(double& value) {
   if (!is_symbol()) throw std::runtime_error("Needs to be symbolic");
   stream() << "    if not nom:" << std::endl;
   stream() << "        y.append(" << repr() << ")#" << value_  << std::endl;
@@ -75,115 +80,115 @@ void Recorder::operator>>=(double& value) {
   value = value_;
 }
 
-double Recorder::getValue() const {return value_;}
+double PythonRecorder::getValue() const {return value_;}
 
-Recorder operator+(const Recorder& lhs, const Recorder& rhs) {
-  return Recorder::from_binary(lhs, rhs, lhs.value_ + rhs.value_, "ca.plus");
+PythonRecorder operator+(const PythonRecorder& lhs, const PythonRecorder& rhs) {
+  return PythonRecorder::from_binary(lhs, rhs, lhs.value_ + rhs.value_, "ca.plus");
 }
-Recorder operator*(const Recorder& lhs, const Recorder& rhs) {
-  return Recorder::from_binary(lhs, rhs, lhs.value_ * rhs.value_, "ca.times");
+PythonRecorder operator*(const PythonRecorder& lhs, const PythonRecorder& rhs) {
+  return PythonRecorder::from_binary(lhs, rhs, lhs.value_ * rhs.value_, "ca.times");
 }
-Recorder operator-(const Recorder& lhs, const Recorder& rhs) {
-  return Recorder::from_binary(lhs, rhs, lhs.value_ - rhs.value_, "ca.minus");
+PythonRecorder operator-(const PythonRecorder& lhs, const PythonRecorder& rhs) {
+  return PythonRecorder::from_binary(lhs, rhs, lhs.value_ - rhs.value_, "ca.minus");
 }
-Recorder operator/(const Recorder& lhs, const Recorder& rhs) {
-  return Recorder::from_binary(lhs, rhs, lhs.value_ / rhs.value_, "ca.rdivide");
+PythonRecorder operator/(const PythonRecorder& lhs, const PythonRecorder& rhs) {
+  return PythonRecorder::from_binary(lhs, rhs, lhs.value_ / rhs.value_, "ca.rdivide");
 }
-bool operator>=(const Recorder& lhs, const Recorder& rhs) {
-  return static_cast<bool>(Recorder::from_binary(lhs, rhs, lhs.value_ >= rhs.value_, "ca.ge"));
+bool operator>=(const PythonRecorder& lhs, const PythonRecorder& rhs) {
+  return static_cast<bool>(PythonRecorder::from_binary(lhs, rhs, lhs.value_ >= rhs.value_, "ca.ge"));
 }
-bool operator<=(const Recorder& lhs, const Recorder& rhs) {
-  return static_cast<bool>(Recorder::from_binary(lhs, rhs, lhs.value_ <= rhs.value_, "ca.le"));
+bool operator<=(const PythonRecorder& lhs, const PythonRecorder& rhs) {
+  return static_cast<bool>(PythonRecorder::from_binary(lhs, rhs, lhs.value_ <= rhs.value_, "ca.le"));
 }
-bool operator>(const Recorder& lhs, const Recorder& rhs) {
-  return static_cast<bool>(Recorder::from_binary(lhs, rhs, lhs.value_ > rhs.value_, "ca.gt"));
+bool operator>(const PythonRecorder& lhs, const PythonRecorder& rhs) {
+  return static_cast<bool>(PythonRecorder::from_binary(lhs, rhs, lhs.value_ > rhs.value_, "ca.gt"));
 }
-bool operator<(const Recorder& lhs, const Recorder& rhs) {
-  return static_cast<bool>(Recorder::from_binary(lhs, rhs, lhs.value_ < rhs.value_, "ca.lt"));
+bool operator<(const PythonRecorder& lhs, const PythonRecorder& rhs) {
+  return static_cast<bool>(PythonRecorder::from_binary(lhs, rhs, lhs.value_ < rhs.value_, "ca.lt"));
 }
-bool operator!=(const Recorder& lhs, const Recorder& rhs) {
-  return static_cast<bool>(Recorder::from_binary(lhs, rhs, lhs.value_ != rhs.value_, "ca.ne"));
+bool operator!=(const PythonRecorder& lhs, const PythonRecorder& rhs) {
+  return static_cast<bool>(PythonRecorder::from_binary(lhs, rhs, lhs.value_ != rhs.value_, "ca.ne"));
 }
-bool operator==(const Recorder& lhs, const Recorder& rhs) {
-  return static_cast<bool>(Recorder::from_binary(lhs, rhs, lhs.value_ == rhs.value_, "ca.eq"));
+bool operator==(const PythonRecorder& lhs, const PythonRecorder& rhs) {
+  return static_cast<bool>(PythonRecorder::from_binary(lhs, rhs, lhs.value_ == rhs.value_, "ca.eq"));
 }
-Recorder operator-(const Recorder& arg) {
-    return Recorder::from_unary(arg, -arg.value_, "-");
+PythonRecorder operator-(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, -arg.value_, "-");
 }
-Recorder pow( const Recorder&lhs, const Recorder& rhs) {
-    return Recorder::from_binary(lhs, rhs, pow(lhs.value_,rhs.value_), "ca.power");
+PythonRecorder pow( const PythonRecorder&lhs, const PythonRecorder& rhs) {
+    return PythonRecorder::from_binary(lhs, rhs, pow(lhs.value_,rhs.value_), "ca.power");
 }
-Recorder fmax ( const Recorder&lhs, const Recorder& rhs) {
-	return Recorder::from_binary(lhs, rhs, fmax(lhs.value_,rhs.value_), "ca.fmax");
+PythonRecorder fmax ( const PythonRecorder&lhs, const PythonRecorder& rhs) {
+	return PythonRecorder::from_binary(lhs, rhs, fmax(lhs.value_,rhs.value_), "ca.fmax");
 }
-Recorder fmin ( const Recorder&lhs, const Recorder& rhs) {
-	return Recorder::from_binary(lhs, rhs, fmin(lhs.value_,rhs.value_), "ca.fmin");
+PythonRecorder fmin ( const PythonRecorder&lhs, const PythonRecorder& rhs) {
+	return PythonRecorder::from_binary(lhs, rhs, fmin(lhs.value_,rhs.value_), "ca.fmin");
 }
-Recorder atan2 ( const Recorder&lhs, const Recorder& rhs) {
-	return Recorder::from_binary(lhs, rhs, atan2(lhs.value_,rhs.value_), "ca.atan2");
+PythonRecorder atan2 ( const PythonRecorder&lhs, const PythonRecorder& rhs) {
+	return PythonRecorder::from_binary(lhs, rhs, atan2(lhs.value_,rhs.value_), "ca.atan2");
 }
-Recorder exp(const Recorder& arg) {
-    return Recorder::from_unary(arg, exp(arg.value_), "ca.exp");
+PythonRecorder exp(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, exp(arg.value_), "ca.exp");
 }
-Recorder log(const Recorder& arg) {
-    return Recorder::from_unary(arg, log(arg.value_), "ca.log");
+PythonRecorder log(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, log(arg.value_), "ca.log");
 }
-Recorder sqrt(const Recorder& arg) {
-    return Recorder::from_unary(arg, sqrt(arg.value_), "ca.sqrt");
+PythonRecorder sqrt(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, sqrt(arg.value_), "ca.sqrt");
 }
-Recorder sin(const Recorder& arg) {
-    return Recorder::from_unary(arg, sin(arg.value_), "ca.sin");
+PythonRecorder sin(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, sin(arg.value_), "ca.sin");
 }
-Recorder cos(const Recorder& arg) {
-    return Recorder::from_unary(arg, cos(arg.value_), "ca.cos");
+PythonRecorder cos(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, cos(arg.value_), "ca.cos");
 }
-Recorder tan(const Recorder& arg) {
-    return Recorder::from_unary(arg, tan(arg.value_), "ca.tan");
+PythonRecorder tan(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, tan(arg.value_), "ca.tan");
 }
-Recorder asin(const Recorder& arg) {
-    return Recorder::from_unary(arg, asin(arg.value_), "ca.asin");
+PythonRecorder asin(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, asin(arg.value_), "ca.asin");
 }
-Recorder acos(const Recorder& arg) {
-    return Recorder::from_unary(arg, acos(arg.value_), "ca.acos");
+PythonRecorder acos(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, acos(arg.value_), "ca.acos");
 }
-Recorder atan(const Recorder& arg) {
-    return Recorder::from_unary(arg, atan(arg.value_), "ca.atan");
+PythonRecorder atan(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, atan(arg.value_), "ca.atan");
 }
-Recorder log10(const Recorder& arg) {
-    return Recorder::from_unary(arg, log10(arg.value_), "ca.log10");
+PythonRecorder log10(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, log10(arg.value_), "ca.log10");
 }
-Recorder sinh(const Recorder& arg) {
-    return Recorder::from_unary(arg, sinh(arg.value_), "ca.sinh");
+PythonRecorder sinh(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, sinh(arg.value_), "ca.sinh");
 }
-Recorder cosh(const Recorder& arg) {
-    return Recorder::from_unary(arg, cosh(arg.value_), "ca.cosh");
+PythonRecorder cosh(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, cosh(arg.value_), "ca.cosh");
 }
-Recorder tanh(const Recorder& arg) {
-    return Recorder::from_unary(arg, tanh(arg.value_), "ca.tanh");
+PythonRecorder tanh(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, tanh(arg.value_), "ca.tanh");
 }
-Recorder asinh(const Recorder& arg) {
-    return Recorder::from_unary(arg, asinh(arg.value_), "ca.asinh");
+PythonRecorder asinh(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, asinh(arg.value_), "ca.asinh");
 }
-Recorder acosh(const Recorder& arg) {
-    return Recorder::from_unary(arg, acosh(arg.value_), "ca.acosh");
+PythonRecorder acosh(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, acosh(arg.value_), "ca.acosh");
 }
-Recorder atanh(const Recorder& arg) {
-    return Recorder::from_unary(arg, atanh(arg.value_), "ca.atanh");
+PythonRecorder atanh(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, atanh(arg.value_), "ca.atanh");
 }
-Recorder erf(const Recorder& arg) {
-    return Recorder::from_unary(arg, erf(arg.value_), "ca.erf");
+PythonRecorder erf(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, erf(arg.value_), "ca.erf");
 }
-Recorder fabs(const Recorder& arg) {
-    return Recorder::from_unary(arg, fabs(arg.value_), "ca.fabs");
+PythonRecorder fabs(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, fabs(arg.value_), "ca.fabs");
 }
-Recorder ceil(const Recorder& arg) {
-    return Recorder::from_unary(arg, ceil(arg.value_), "ca.ceil");
+PythonRecorder ceil(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, ceil(arg.value_), "ca.ceil");
 }
-Recorder floor(const Recorder& arg) {
-    return Recorder::from_unary(arg, floor(arg.value_), "ca.floor");
+PythonRecorder floor(const PythonRecorder& arg) {
+    return PythonRecorder::from_unary(arg, floor(arg.value_), "ca.floor");
 }
 
-Recorder::operator bool() const {
+PythonRecorder::operator bool() const {
    bool ret = value_==1;
 
     if (is_symbol()) {
@@ -194,16 +199,16 @@ Recorder::operator bool() const {
     return ret;
 }
 
-std::ostream& operator<<(std::ostream &stream, const Recorder& obj) {
+std::ostream& operator<<(std::ostream &stream, const PythonRecorder& obj) {
   obj.disp(stream);
   return stream;
 }
 
-std::istream& operator >> (std::istream& is, const Recorder& a) {
+std::istream& operator >> (std::istream& is, const PythonRecorder& a) {
   throw std::runtime_error("No way!");
 }
 
-void Recorder::stop_recording() {
+void PythonRecorder::stop_recording() {
   stream() << "    if not nom:" << std::endl;
   stream() << "        y = ca.vertcat(*y)" << std::endl;
   
@@ -213,9 +218,11 @@ void Recorder::stop_recording() {
   }
 
   stream() << "    return y, a, b" << std::endl;
+
+  python_stream_wrapper_.reset();
 }
 
-void Recorder::disp(std::ostream &stream) const {
+void PythonRecorder::disp(std::ostream &stream) const {
   if (is_symbol()) {
     stream << "    [#" << id_ << "|" << value_ << "]";
   } else {
@@ -223,16 +230,16 @@ void Recorder::disp(std::ostream &stream) const {
   }
 }
 
-int Recorder::get_id() {
+int PythonRecorder::get_id() {
   counter++;
   return counter;
 }
 
-bool Recorder::is_symbol() const {
+bool PythonRecorder::is_symbol() const {
   return id_>=0;
 }
 
-std::string Recorder::repr() const {
+std::string PythonRecorder::repr() const {
   if (is_symbol()) {
     return "a" + std::to_string(id_);
   } else {
@@ -247,69 +254,394 @@ bool is_suspicious(double v) {
   return (v>0 && v <1e-200) || (v<0 && v >-1e-200);
 }
 
-Recorder Recorder::from_binary(const Recorder& lhs, const Recorder& rhs, double res, const std::string& op) {
+PythonRecorder PythonRecorder::from_binary(const PythonRecorder& lhs, const PythonRecorder& rhs, double res, const std::string& op) {
   if (lhs.is_symbol() || rhs.is_symbol()) {
     int id = get_id();
     stream() << "    a" << id << " = " << op << "(" << lhs.repr() <<  "," <<   rhs.repr() << ")" << std::endl;
     stream() << "    if nom:" << std::endl;
-	stream() << "        assert(" << "a" << id << "==" << res << ")" << std::endl;
+	  stream() << "        assert(" << "a" << id << "==" << res << ")" << std::endl;
 
     if (is_suspicious(res)) {
       stream() << "    # suspicious activity" << std::endl;
     }
 
-    return Recorder(res, id);
+    return PythonRecorder(res, id);
   } else {
-    return Recorder(res);
+    return PythonRecorder(res);
   }
 }
 
-Recorder Recorder::from_unary(const Recorder& arg, double res, const std::string& op) {
+PythonRecorder PythonRecorder::from_unary(const PythonRecorder& arg, double res, const std::string& op) {
   if (arg.is_symbol()) {
     int id = get_id();
     stream() << "    a" << id << " = " << op << "(" << arg.repr() << ")" << std::endl;
     stream() << "    if nom:" << std::endl;
-	stream() << "        assert(" << "a" << id << "==" << res << ")" << std::endl;
+	  stream() << "        assert(" << "a" << id << "==" << res << ")" << std::endl;
 
     if (is_suspicious(res)) {
       stream() << "    # suspicious activity" << std::endl;
     }
 
-    return Recorder(res, id);
+    return PythonRecorder(res, id);
   } else {
-    return Recorder(res);
+    return PythonRecorder(res);
   }
 }
 
-class StreamWrapper {
-public:
-    StreamWrapper() {
-        stream = new std::ofstream("foo.py");
-        (*stream) << std::scientific << std::setprecision(16);		
-        (*stream) << "def foo(*args):" << std::endl;
-		(*stream) << "    import casadi as ca" << std::endl;
-		(*stream) << "    nom = len(args) == 0" << std::endl;
-		(*stream) << "    if not nom:" << std::endl;
-		(*stream) << "        x = args[0]" << std::endl;
-		(*stream) << "    a = []" << std::endl;
-		(*stream) << "    b = []" << std::endl;
-		(*stream) << "    y = []" << std::endl;
-    }
+// new PythonStreamWrapper
+std::unique_ptr<PythonStreamWrapper> PythonRecorder::python_stream_wrapper_;
 
-    std::ofstream* stream;
+PythonStreamWrapper::PythonStreamWrapper(const std::string& filename)
+    : stream_(std::filesystem::path(filename).replace_extension(".py").string(),
+     std::ios::out) {
+  if (!stream_.is_open()) {
+    throw std::runtime_error("Failed to open file: " + filename);
+  }
+  stream_ << std::scientific << std::setprecision(16);		
+  stream_ << "def " 
+          << std::filesystem::path(filename).stem().string() 
+          << "(*args):" << std::endl;
+  stream_ << "    import casadi as ca" << std::endl;
+  stream_ << "    nom = len(args) == 0" << std::endl;
+  stream_ << "    if not nom:" << std::endl;
+  stream_ << "        x = args[0]" << std::endl;
+  stream_ << "    a = []" << std::endl;
+  stream_ << "    b = []" << std::endl;
+  stream_ << "    y = []" << std::endl;
+}
+
+std::ofstream& PythonStreamWrapper::stream() {
+  return stream_;
+}
+
+void PythonRecorder::start_recording(const std::string& filename) {
+  if (python_stream_wrapper_) {
+    throw std::runtime_error("Recording already started.");
+  }
+  python_stream_wrapper_ = std::make_unique<PythonStreamWrapper>(filename);
+}
+
+void PythonRecorder::start_recording() {
+  PythonRecorder::start_recording("foo.py");
 };
-static StreamWrapper stream_wrapper{};
 
-std::ofstream& Recorder::stream() {
-  return *stream_wrapper.stream;
-};
+std::ofstream& PythonRecorder::stream() {
+  if (!python_stream_wrapper_) {
+    //throw std::runtime_error("Recording not started. Call start_recording() first.");
+    PythonRecorder::start_recording();
+  }
+  return python_stream_wrapper_->stream();
+}
 
-Recorder::Recorder(double value, int id) {
+PythonRecorder::PythonRecorder(double value, int id) {
   id_ = id;
   value_ = value;
 }
 
-int Recorder::counter = 0;
-int Recorder::counter_input = 0;
-int Recorder::counter_output = 0;
-int Recorder::counter_bool = 0;
+int PythonRecorder::counter = 0;
+int PythonRecorder::counter_input = 0;
+int PythonRecorder::counter_output = 0;
+int PythonRecorder::counter_bool = 0;
+
+//-------------------------------------------------------------------------
+// matlab 
+//-------------------------------------------------------------------------
+
+MatlabRecorder::MatlabRecorder(const MatlabRecorder& r) {
+  value_ = r.value_;
+  if (r.is_symbol()) {
+    id_ = get_id();
+    stream() << "a" + std::to_string(id_) << " = " << r.repr() << ";% copy constructor" << value_ << std::endl;
+  } else {
+    id_ = -1;
+  }
+}
+
+MatlabRecorder::~MatlabRecorder() {
+       if(id_ == 0) std::cout << "goodbye" << id_ << ":" << value_ << std::endl;
+}
+
+MatlabRecorder::MatlabRecorder() : id_(-1), value_(3.14) {}
+MatlabRecorder::MatlabRecorder(double value) : id_(-1), value_(value) {}
+
+void MatlabRecorder::operator<<=(double value) {
+  if (is_symbol()) throw std::runtime_error("Needs to be symbolic");
+  id_ = get_id();
+  stream() << "if nom" << std::endl;
+  stream() << "  " << repr() << " = " << value << ";" << std::endl;
+  stream() << "else" << std::endl;
+  stream() << "  " << repr() << " = x(" << counter_input+1 << ");" << std::endl;
+  stream() << "end" << std::endl;
+  counter_input++;
+  value_ = value;
+}
+
+MatlabRecorder& MatlabRecorder::operator = ( const MatlabRecorder& r) {
+  value_ = r.value_;
+  if (r.is_symbol()) {
+    id_ = get_id();
+    stream() << "a" + std::to_string(id_) << " = " << r.repr() << ";% copy assignment" << value_ << std::endl;
+  } else {
+    id_ = -1;
+  }
+  return *this;
+}
+
+void MatlabRecorder::operator>>=(double& value) {
+  if (!is_symbol()) throw std::runtime_error("Needs to be symbolic");
+  stream() << "if ~nom" << std::endl;
+  stream() << "  y{" << counter_output+1 << "} = " << repr() << ";%" << value_  << std::endl;
+  stream() << "end" << std::endl;
+  counter_output++;
+  value = value_;
+}
+
+double MatlabRecorder::getValue() const {return value_;}
+
+MatlabRecorder operator+(const MatlabRecorder& lhs, const MatlabRecorder& rhs) {
+  return MatlabRecorder::from_binary(lhs, rhs, lhs.value_ + rhs.value_, "plus");
+}
+MatlabRecorder operator*(const MatlabRecorder& lhs, const MatlabRecorder& rhs) {
+  return MatlabRecorder::from_binary(lhs, rhs, lhs.value_ * rhs.value_, "times");
+}
+MatlabRecorder operator-(const MatlabRecorder& lhs, const MatlabRecorder& rhs) {
+  return MatlabRecorder::from_binary(lhs, rhs, lhs.value_ - rhs.value_, "minus");
+}
+MatlabRecorder operator/(const MatlabRecorder& lhs, const MatlabRecorder& rhs) {
+  return MatlabRecorder::from_binary(lhs, rhs, lhs.value_ / rhs.value_, "rdivide");
+}
+bool operator>=(const MatlabRecorder& lhs, const MatlabRecorder& rhs) {
+  return static_cast<bool>(MatlabRecorder::from_binary(lhs, rhs, lhs.value_ >= rhs.value_, "ge"));
+}
+bool operator<=(const MatlabRecorder& lhs, const MatlabRecorder& rhs) {
+  return static_cast<bool>(MatlabRecorder::from_binary(lhs, rhs, lhs.value_ <= rhs.value_, "le"));
+}
+bool operator>(const MatlabRecorder& lhs, const MatlabRecorder& rhs) {
+  return static_cast<bool>(MatlabRecorder::from_binary(lhs, rhs, lhs.value_ > rhs.value_, "gt"));
+}
+bool operator<(const MatlabRecorder& lhs, const MatlabRecorder& rhs) {
+  return static_cast<bool>(MatlabRecorder::from_binary(lhs, rhs, lhs.value_ < rhs.value_, "lt"));
+}
+bool operator!=(const MatlabRecorder& lhs, const MatlabRecorder& rhs) {
+  return static_cast<bool>(MatlabRecorder::from_binary(lhs, rhs, lhs.value_ != rhs.value_, "ne"));
+}
+bool operator==(const MatlabRecorder& lhs, const MatlabRecorder& rhs) {
+  return static_cast<bool>(MatlabRecorder::from_binary(lhs, rhs, lhs.value_ == rhs.value_, "eq"));
+}
+MatlabRecorder operator-(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, -arg.value_, "uminus");
+}
+MatlabRecorder pow( const MatlabRecorder&lhs, const MatlabRecorder& rhs) {
+    return MatlabRecorder::from_binary(lhs, rhs, pow(lhs.value_,rhs.value_), "power");
+}
+MatlabRecorder fmax ( const MatlabRecorder&lhs, const MatlabRecorder& rhs) {
+	return MatlabRecorder::from_binary(lhs, rhs, fmax(lhs.value_,rhs.value_), "max");
+}
+MatlabRecorder fmin ( const MatlabRecorder&lhs, const MatlabRecorder& rhs) {
+	return MatlabRecorder::from_binary(lhs, rhs, fmin(lhs.value_,rhs.value_), "min");
+}
+MatlabRecorder atan2 ( const MatlabRecorder&lhs, const MatlabRecorder& rhs) {
+	return MatlabRecorder::from_binary(lhs, rhs, atan2(lhs.value_,rhs.value_), "atan2");
+}
+MatlabRecorder exp(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, exp(arg.value_), "exp");
+}
+MatlabRecorder log(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, log(arg.value_), "log");
+}
+MatlabRecorder sqrt(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, sqrt(arg.value_), "sqrt");
+}
+MatlabRecorder sin(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, sin(arg.value_), "sin");
+}
+MatlabRecorder cos(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, cos(arg.value_), "cos");
+}
+MatlabRecorder tan(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, tan(arg.value_), "tan");
+}
+MatlabRecorder asin(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, asin(arg.value_), "asin");
+}
+MatlabRecorder acos(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, acos(arg.value_), "acos");
+}
+MatlabRecorder atan(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, atan(arg.value_), "atan");
+}
+MatlabRecorder log10(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, log10(arg.value_), "log10");
+}
+MatlabRecorder sinh(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, sinh(arg.value_), "sinh");
+}
+MatlabRecorder cosh(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, cosh(arg.value_), "cosh");
+}
+MatlabRecorder tanh(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, tanh(arg.value_), "tanh");
+}
+MatlabRecorder asinh(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, asinh(arg.value_), "asinh");
+}
+MatlabRecorder acosh(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, acosh(arg.value_), "acosh");
+}
+MatlabRecorder atanh(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, atanh(arg.value_), "atanh");
+}
+MatlabRecorder erf(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, erf(arg.value_), "erf");
+}
+MatlabRecorder fabs(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, fabs(arg.value_), "abs");
+}
+MatlabRecorder ceil(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, ceil(arg.value_), "ceil");
+}
+MatlabRecorder floor(const MatlabRecorder& arg) {
+    return MatlabRecorder::from_unary(arg, floor(arg.value_), "floor");
+}
+
+MatlabRecorder::operator bool() const {
+   bool ret = value_==1;
+
+    if (is_symbol()) {
+      counter_bool++;
+      stream() << "a{" << counter_asserts+1 << "} = " << repr() << "-" << value_ << ";%" << value_  << std::endl;
+      stream() << "b{" << counter_asserts + 1 << "} = " << repr() << ";%" << value_ << std::endl;
+    }
+    return ret;
+}
+
+std::ostream& operator<<(std::ostream &stream, const MatlabRecorder& obj) {
+  obj.disp(stream);
+  return stream;
+}
+
+std::istream& operator >> (std::istream& is, const MatlabRecorder& a) {
+  throw std::runtime_error("No way!");
+}
+
+void MatlabRecorder::stop_recording() {
+  stream() << "if ~nom, y = vertcat(y{:}); end" << std::endl;
+  if (counter_bool > 0) {
+    stream() << "a = vertcat(a{:});" << std::endl;
+    stream() << "b = vertcat(b{:});" << std::endl;
+  } else {
+    stream() << "a = {};" << std::endl;
+    stream() << "b = {};" << std::endl;
+  }
+  stream() << "end" << std::endl;
+
+  matlab_stream_wrapper_.reset();
+}
+
+void MatlabRecorder::disp(std::ostream &stream) const {
+  if (is_symbol()) {
+    stream << "[#" << id_ << "|" << value_ << "]";
+  } else {
+    stream << "(" << value_ << ")";
+  }
+}
+
+int MatlabRecorder::get_id() {
+  counter++;
+  return counter;
+}
+
+bool MatlabRecorder::is_symbol() const {
+  return id_>=0;
+}
+
+std::string MatlabRecorder::repr() const {
+  if (is_symbol()) {
+    return "a" + std::to_string(id_);
+  } else {
+    std::stringstream ss;
+    ss << std::scientific << std::setprecision(16);
+    ss << value_;
+    return ss.str();
+  }
+}
+
+MatlabRecorder MatlabRecorder::from_binary(const MatlabRecorder& lhs, const MatlabRecorder& rhs, double res, const std::string& op) {
+  if (lhs.is_symbol() || rhs.is_symbol()) {
+    int id = get_id();
+    stream() << "a" << id << " = " << op << "(" << lhs.repr() <<  "," <<   rhs.repr() << ");" << std::endl;
+    stream() << "if nom, assert(" << "a" << id << "==" << res << "); end" << std::endl;
+
+    if (is_suspicious(res)) {
+      stream() << "% suspicious activity" << std::endl;
+    }
+
+    return MatlabRecorder(res, id);
+  } else {
+    return MatlabRecorder(res);
+  }
+}
+
+MatlabRecorder MatlabRecorder::from_unary(const MatlabRecorder& arg, double res, const std::string& op) {
+  if (arg.is_symbol()) {
+    int id = get_id();
+    stream() << "a" << id << " = " << op << "(" << arg.repr() << ");" << std::endl;
+    stream() << "if nom, assert(" << "a" << id << "==" << res << "); end" << std::endl;
+
+    if (is_suspicious(res)) {
+      stream() << "% suspicious activity" << std::endl;
+    }
+
+    return MatlabRecorder(res, id);
+  } else {
+    return MatlabRecorder(res);
+  }
+}
+
+std::unique_ptr<MatlabStreamWrapper> MatlabRecorder::matlab_stream_wrapper_;
+
+MatlabStreamWrapper::MatlabStreamWrapper(const std::string& filename)
+    : stream_(std::filesystem::path(filename).replace_extension(".m").string(),
+     std::ios::out) {
+  if (!stream_.is_open()) {
+    throw std::runtime_error("Failed to open file: " + filename);
+  }
+  stream_ << std::scientific << std::setprecision(16);
+  stream_ << "function [y,a,b]=" 
+          << std::filesystem::path(filename).stem().string() 
+          <<"(x)" << std::endl;
+  stream_ << "nom = nargin==0;" << std::endl;
+};
+
+std::ofstream& MatlabStreamWrapper::stream() {
+  return stream_;
+}
+
+void MatlabRecorder::start_recording(const std::string& filename) {
+  if (matlab_stream_wrapper_) {
+    throw std::runtime_error("Recording already started.");
+  }
+  matlab_stream_wrapper_ = std::make_unique<MatlabStreamWrapper>(filename);
+}
+
+void MatlabRecorder::start_recording() {
+  MatlabRecorder::start_recording("foo.mat");
+};
+
+std::ofstream& MatlabRecorder::stream() {
+  if (!matlab_stream_wrapper_) {
+    //throw std::runtime_error("Recording not started. Call start_recording() first.");
+    MatlabRecorder::start_recording();
+  }
+  return matlab_stream_wrapper_->stream();
+}
+
+MatlabRecorder::MatlabRecorder(double value, int id) {
+  id_ = id;
+  value_ = value;
+}
+
+int MatlabRecorder::counter = 0;
+int MatlabRecorder::counter_input = 0;
+int MatlabRecorder::counter_output = 0;
+int MatlabRecorder::counter_bool = 0;

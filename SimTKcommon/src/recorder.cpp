@@ -25,8 +25,8 @@
 #include <stdexcept>
 #include <iomanip>
 #include <cmath>
-//#include "SimTKcommon/internal/Recorder.h"
-#include "recorder.h"
+#include "SimTKcommon/internal/Recorder.h"
+//#include "recorder.h"
 
 static int counter_asserts = 0;
 

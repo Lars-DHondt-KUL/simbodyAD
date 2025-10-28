@@ -21,12 +21,26 @@
  */
 
 #include <iostream>
+#include <sstream>
+#include <fstream>
+#include <memory>
+#include <string>
+#include <initializer_list>
 
 #if defined _WIN32
 #define DLL_EXPORT __declspec(dllexport)
 #else
 #define DLL_EXPORT
 #endif // defined _WIN32
+
+class StreamWrapper {
+public:
+  StreamWrapper(const std::string& filename, const int file_type);
+  std::ofstream& stream();
+
+private:
+  std::ofstream stream_;
+};
 
 class DLL_EXPORT Recorder {
 public:
@@ -38,7 +52,11 @@ public:
   explicit operator bool() const;
   Recorder(const Recorder& r);
   friend DLL_EXPORT std::ostream& operator<<(std::ostream &stream, const Recorder& obj);
+  static void start_recording();
+  static void start_recording(const std::string& filename);
   static void stop_recording();
+  static void set_output_python();
+  static void set_output_matlab();
 
   /* Assignments */
   double getValue() const;
@@ -66,7 +84,7 @@ public:
   friend bool DLL_EXPORT operator >= ( const Recorder&, const Recorder& );
   friend bool DLL_EXPORT operator >  ( const Recorder&, const Recorder& );
   friend bool DLL_EXPORT operator <  ( const Recorder&, const Recorder& );
-  inline friend bool operator != (double lhs, const Recorder& rhs) { return Recorder(lhs)!=rhs; }
+  inline friend bool operator != ( double lhs, const Recorder& rhs) { return Recorder(lhs)!=rhs; }
   inline friend bool operator == ( double lhs, const Recorder& rhs) { return Recorder(lhs)==rhs; }
   inline friend bool operator <= ( double lhs, const Recorder& rhs) { return Recorder(lhs)<=rhs; }
   inline friend bool operator >= ( double lhs, const Recorder& rhs) { return Recorder(lhs)>=rhs; }
@@ -144,6 +162,16 @@ protected:
   static int counter_input;
   static int counter_output;
   static int counter_bool;
+
+  static int output_file_type; // 0: .py, 1: .m
+  static std::unique_ptr<StreamWrapper> stream_wrapper_;
+
+  template<typename... Strings>
+  static const char* output_string(Strings... strings) {
+      const char* options[] = {strings...};
+      int index = (output_file_type < sizeof...(Strings)) ? output_file_type : 0;
+      return options[index];
+  }
 };
 
 #endif // Recorder_H_

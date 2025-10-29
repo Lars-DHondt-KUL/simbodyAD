@@ -17,10 +17,10 @@
  *      permissions and limitations under the License.
  */
 
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <filesystem>
+//#include <iostream>
+//#include <sstream>
+//#include <fstream>
+#include <algorithm>
 #include <ctime>
 #include <stdexcept>
 #include <iomanip>
@@ -49,12 +49,17 @@ Recorder::Recorder() : id_(-1), value_(3.14) {}
 Recorder::Recorder(double value) : id_(-1), value_(value) {}
 
 // select python or matlab output
-// TODO: prevent switching while file is open
 int Recorder::output_file_type = 0; // default .py
 void Recorder::set_output_python() {
+  if (stream_wrapper_ && output_file_type != 0) {
+    throw std::runtime_error("Changing file type is not allowed while recording in progress.");
+  }
   output_file_type = 0;
 }
 void Recorder::set_output_matlab() {
+  if (stream_wrapper_ && output_file_type != 1) {
+    throw std::runtime_error("Changing file type is not allowed while recording in progress.");
+  }
   output_file_type = 1;
 }
 
@@ -365,28 +370,23 @@ Recorder Recorder::from_unary(const Recorder& arg, double res, const std::string
 std::unique_ptr<StreamWrapper> Recorder::stream_wrapper_;
 
 StreamWrapper::StreamWrapper(const std::string& filename, const int file_type) {
-  // clean up filename and create filepath
-  std::string filepath;
-  switch (file_type) {
-    case 0: // python
-      filepath = std::filesystem::path(filename).replace_extension(".py").string();
-      break;
-    case 1: // matlab
-      filepath = std::filesystem::path(filename).replace_extension(".m").string();
-      break;
-  }
-  
-  stream_ = std::ofstream(filepath);
+
+  stream_ = std::ofstream(filename);
   if (!stream_.is_open()) {
-    throw std::runtime_error("Failed to open file: " + filepath);
+    throw std::runtime_error("Failed to open file: " + filename);
   }
   stream_ << std::scientific << std::setprecision(16);
 
+  // The name of the function is the name of the file
+  size_t dot_pos = filename.find_last_of('.');
+  size_t sep_pos = std::max<size_t>(filename.find_last_of('/'), filename.find_last_of('/'));
+  if (dot_pos < sep_pos) dot_pos = std::string::npos;
+  std::string func_name = (dot_pos != std::string::npos) ? filename.substr(0, dot_pos) : filename;
+  func_name = (sep_pos != std::string::npos) ? func_name.substr(sep_pos+1) : func_name;
+
   switch (file_type) {
     case 0: // python	
-      stream_ << "def " 
-              << std::filesystem::path(filename).stem().string() 
-              << "(*args):" << std::endl;
+      stream_ << "def " << func_name << "(*args):" << std::endl;
       stream_ << "    import casadi as ca" << std::endl;
       stream_ << "    nom = len(args) == 0" << std::endl;
       stream_ << "    if not nom:" << std::endl;
@@ -396,9 +396,7 @@ StreamWrapper::StreamWrapper(const std::string& filename, const int file_type) {
       stream_ << "    y = []" << std::endl;
       break;
     case 1: // matlab
-      stream_ << "function [y,a,b]=" 
-              << std::filesystem::path(filename).stem().string() 
-              << "(x)" << std::endl;
+      stream_ << "function [y,a,b]=" << func_name << "(x)" << std::endl;
       stream_ << "    nom = nargin==0;" << std::endl;
       break;
     }
@@ -413,10 +411,25 @@ void Recorder::start_recording(const std::string& filename) {
     throw std::runtime_error("Recording already started.");
   }
 
-  if (std::filesystem::path(filename).extension().string() == ".py") set_output_python();
-  if (std::filesystem::path(filename).extension().string() == ".m") set_output_matlab();
+  std::string filepath = filename;
+  size_t dot_pos = filepath.find_last_of('.');
+  // detect file type from filename extension
+  if (dot_pos != std::string::npos && filepath.substr(dot_pos) == ".py") {
+    set_output_python();
+  } else if (dot_pos != std::string::npos && filepath.substr(dot_pos) == ".m") {
+    set_output_matlab();
+  } else {
+    switch (output_file_type) {
+      case 0: // python
+        filepath.append(".py");
+        break;
+      case 1: // matlab
+        filepath.append(".m");
+        break;
+    }
+  }
 
-  stream_wrapper_ = std::make_unique<StreamWrapper>(filename, output_file_type);
+  stream_wrapper_ = std::make_unique<StreamWrapper>(filepath, output_file_type);
 }
 
 void Recorder::start_recording() {

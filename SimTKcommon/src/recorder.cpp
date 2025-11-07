@@ -429,7 +429,7 @@ void Recorder::start_recording(const std::string& filename) {
     }
   }
 
-  stream_wrapper_ = std::make_unique<StreamWrapper>(filepath, output_file_type);
+  stream_wrapper_.reset(new StreamWrapper(filepath, output_file_type));
 }
 
 void Recorder::start_recording() {

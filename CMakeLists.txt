@@ -16,7 +16,7 @@ if(MSVC)
 else()
     set(SIMBODY_REQUIRED_CMAKE_VERSION 2.8.10)
 endif()
-cmake_minimum_required(VERSION ${SIMBODY_REQUIRED_CMAKE_VERSION})
+cmake_minimum_required(VERSION ${SIMBODY_REQUIRED_CMAKE_VERSION}...3.22.0)
 
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)

@@ -26,6 +26,7 @@
 #include <memory>
 #include <string>
 #include <initializer_list>
+#include <mutex>
 
 #if defined _WIN32
 #define DLL_EXPORT __declspec(dllexport)
@@ -165,6 +166,7 @@ protected:
 
   static int output_file_type; // 0: .py, 1: .m
   static std::unique_ptr<StreamWrapper> stream_wrapper_;
+  static std::mutex recorder_is_busy_;
 
   template<typename... Strings>
   static const char* output_string(Strings... strings) {

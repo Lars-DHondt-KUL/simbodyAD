@@ -284,6 +284,9 @@ void Recorder::stop_recording() {
   counter_input = 0;
   counter_output = 0;
   counter_bool = 0;
+
+  Recorder::recorder_is_busy_.unlock();
+  
 }
 
 void Recorder::disp(std::ostream &stream) const {
@@ -406,6 +409,8 @@ std::ofstream& StreamWrapper::stream() {
   return stream_;
 }
 
+std::mutex Recorder::recorder_is_busy_;
+
 void Recorder::start_recording(const std::string& filename) {
   if (stream_wrapper_) {
     throw std::runtime_error("Recording already started.");
@@ -428,6 +433,8 @@ void Recorder::start_recording(const std::string& filename) {
         break;
     }
   }
+
+  Recorder::recorder_is_busy_.lock();
 
   stream_wrapper_.reset(new StreamWrapper(filepath, output_file_type));
 }

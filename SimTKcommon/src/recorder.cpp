@@ -382,8 +382,8 @@ StreamWrapper::StreamWrapper(const std::string& filename, const int file_type) {
 
   // The name of the function is the name of the file
   size_t dot_pos = filename.find_last_of('.');
-  size_t sep_pos = std::max<size_t>(filename.find_last_of('/'), filename.find_last_of('/'));
-  if (dot_pos < sep_pos) dot_pos = std::string::npos;
+  size_t sep_pos = filename.find_last_of('/');
+  if (sep_pos != std::string::npos && dot_pos < sep_pos) dot_pos = std::string::npos;
   std::string func_name = (dot_pos != std::string::npos) ? filename.substr(0, dot_pos) : filename;
   func_name = (sep_pos != std::string::npos) ? func_name.substr(sep_pos+1) : func_name;
 
